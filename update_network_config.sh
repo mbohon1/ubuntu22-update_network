@@ -1,27 +1,37 @@
 #!/bin/bash
 
-# Đường dẫn đến tập tin Netplan mới
-FILE_PATH="/etc/netplan/01-netcfg.yaml"
+# Tìm địa chỉ IPv6 và gateway
+IPV6ADDR=$(ip -6 addr show dev ens3 | grep 'inet6' | grep -v 'fe80' | awk '{print $2}' | cut -d/ -f1)
+IPV6GATEWAY=$(ip -6 route show default | awk '{print $3}')
 
-# Nội dung mới để thay thế
-NEW_CONTENT=$(cat <<EOF
+# Kiểm tra nếu không tìm thấy địa chỉ IPv6 hoặc gateway
+if [ -z "$IPV6ADDR" ] || [ -z "$IPV6GATEWAY" ]; then
+  echo "Không tìm thấy địa chỉ IPv6 hoặc gateway."
+  exit 1
+fi
+
+NETPLAN_CONFIG="/etc/netplan/01-netcfg.yaml"
+
+# Tạo file cấu hình Netplan
+cat <<EOT > $NETPLAN_CONFIG
 network:
   version: 2
   ethernets:
-    eth0:
+    ens3:
       dhcp4: true
-      dhcp6: true
       addresses:
-        - 2407:5b40:0:43f::2a4/64
-      gateway6: 2407:5b40:0:43f::1
-EOF
-)
-
-# Tạo hoặc ghi đè nội dung vào tập tin Netplan
-echo "$NEW_CONTENT" > $FILE_PATH
+        - $IPV6ADDR/64
+      routes:
+        - to: default
+          via: $IPV6GATEWAY
+      nameservers:
+        addresses:
+          - 2001:4860:4860::8888
+          - 2001:4860:4860::8844
+EOT
 
 # Áp dụng cấu hình Netplan
-netplan apply
+sudo netplan apply
 
-echo "Đã cập nhật và áp dụng cấu hình mạng."
-
+# Kiểm tra kết nối IPv6
+ping6 google.com -c 4
