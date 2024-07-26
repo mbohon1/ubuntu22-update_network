@@ -1,30 +1,26 @@
 #!/bin/bash
 
-# Đường dẫn đến tập tin cần chỉnh sửa
-FILE_PATH="/etc/sysconfig/network-scripts/ifcfg-eth0"
+# Đường dẫn đến tập tin Netplan mới
+FILE_PATH="/etc/netplan/01-netcfg.yaml"
 
 # Nội dung mới để thay thế
 NEW_CONTENT=$(cat <<EOF
-# Created by cloud-init on instance boot automatically, do not edit.
-BOOTPROTO=dhcp
-DEVICE=eth0
-DHCPV6C=yes
-HWADDR=fa:16:3e:af:61:43
-IPV6INIT=yes
-IPV6_AUTOCONF=no
-ONBOOT=yes
-TYPE=Ethernet
-USERCTL=no
-
-IPV6ADDR=2407:5b40:0:43f::2a4/64
-IPV6_DEFAULTGW=2407:5b40:0:43f::1
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: true
+      dhcp6: true
+      addresses:
+        - 2407:5b40:0:43f::2a4/64
+      gateway6: 2407:5b40:0:43f::1
 EOF
 )
 
-# Xóa nội dung cũ và thêm nội dung mới vào tập tin
+# Tạo hoặc ghi đè nội dung vào tập tin Netplan
 echo "$NEW_CONTENT" > $FILE_PATH
 
-# Khởi động lại dịch vụ mạng (tùy thuộc vào hệ thống của bạn)
-systemctl restart network
+# Áp dụng cấu hình Netplan
+netplan apply
 
-echo "Đã cập nhật và khởi động lại dịch vụ mạng."
+echo "Đã cập nhật và áp dụng cấu hình mạng."
