@@ -2,9 +2,11 @@
 
 # Tìm địa chỉ IPv6
 IPV6ADDR=$(ip -6 addr show dev ens3 | grep 'inet6' | grep -v 'fe80' | awk '{print $2}' | cut -d/ -f1)
+echo "Tìm thấy địa chỉ IPv6: $IPV6ADDR"
 
 # Tìm gateway IPv6
 IPV6GATEWAY=$(ip -6 route show default | awk '{print $3}')
+echo "Tìm thấy gateway IPv6: $IPV6GATEWAY"
 
 # Kiểm tra nếu không tìm thấy địa chỉ IPv6 hoặc gateway
 if [ -z "$IPV6ADDR" ] || [ -z "$IPV6GATEWAY" ]; then
@@ -48,4 +50,4 @@ if [ $? -ne 0 ]; then
   exit 1
 else
   echo "Cấu hình mới hoạt động tốt."
-fi
+fi 
