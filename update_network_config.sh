@@ -1,10 +1,14 @@
 #!/bin/bash
 
 # Tìm địa chỉ IPv6
+echo "Đang tìm địa chỉ IPv6..."
+ip -6 addr show dev ens3
 IPV6ADDR=$(ip -6 addr show dev ens3 | grep 'inet6' | grep -v 'fe80' | awk '{print $2}' | cut -d/ -f1)
 echo "Tìm thấy địa chỉ IPv6: $IPV6ADDR"
 
 # Tìm gateway IPv6
+echo "Đang tìm gateway IPv6..."
+ip -6 route show default
 IPV6GATEWAY=$(ip -6 route show default | awk '{print $3}')
 echo "Tìm thấy gateway IPv6: $IPV6GATEWAY"
 
