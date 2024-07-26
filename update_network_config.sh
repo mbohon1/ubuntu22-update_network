@@ -24,3 +24,4 @@ echo "$NEW_CONTENT" > $FILE_PATH
 netplan apply
 
 echo "Đã cập nhật và áp dụng cấu hình mạng."
+
